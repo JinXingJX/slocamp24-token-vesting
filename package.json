@@ -30,7 +30,7 @@
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "solana-bankrun": "^0.4.0",
-    "spl-token-bankrun": "^0.2.6"
+    "spl-token-bankrun": "0.2.5"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

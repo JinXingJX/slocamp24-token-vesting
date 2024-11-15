@@ -8,7 +8,7 @@ use anchor_spl::{
 
 const ANCHOR_DISCRIMITOR_SPACE: usize = 8;
 
-declare_id!("AsjZ3kWAUSQRNt2pZVeJkywhZ6gpLpHZmJjduPmKZDZZ");
+declare_id!("AvjMbYDyYHPhQF15ZAwvGcYQKzx5hPxirinSSFdrknMY");
 
 #[program]
 pub mod tokenvesting {
