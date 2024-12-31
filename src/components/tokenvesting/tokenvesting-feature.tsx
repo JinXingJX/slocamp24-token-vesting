@@ -16,7 +16,7 @@ export default function TokenvestingFeature() {
       <AppHero
         title="Tokenvesting"
         subtitle={
-          'Create a new account by clicking the "Create" button. The state of a account is stored on-chain and can be manipulated by calling the program\'s methods (increment, decrement, set, and close).'
+          'Create a new vesting account by clicking the "Create" button belower .'
         }
       >
         <p className="mb-6">

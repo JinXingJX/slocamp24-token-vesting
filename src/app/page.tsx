@@ -1,5 +1,5 @@
-import DashboardFeature from '@/components/dashboard/dashboard-feature'
+import TokenvestingFeature from '@/components/tokenvesting/tokenvesting-feature'
 
 export default function Page() {
-  return <DashboardFeature />
+  return <TokenvestingFeature />
 }

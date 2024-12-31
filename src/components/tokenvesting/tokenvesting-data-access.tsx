@@ -1,6 +1,6 @@
 'use client'
 
-import {getTokenvestingProgram, getTokenvestingProgramId} from '@project/anchor'
+import {getTokenvestingProgram, getTokenvestingProgramId, TOKENVESTING_PROGRAM_ID} from '@project/anchor'
 import {useConnection} from '@solana/wallet-adapter-react'
 import {Cluster, Keypair, PublicKey} from '@solana/web3.js'
 import {useMutation, useQuery} from '@tanstack/react-query'
@@ -9,6 +9,20 @@ import toast from 'react-hot-toast'
 import {useCluster} from '../cluster/cluster-data-access'
 import {useAnchorProvider} from '../solana/solana-provider'
 import {useTransactionToast} from '../ui/ui-layout'
+import { BN } from '@coral-xyz/anchor'
+
+interface CreateVestingArgs {
+  companyName: string
+  mint: string
+}
+
+interface CreateEmployeeArgs {
+  startTime: number
+  endTime: number
+  amount: number
+  cliffTime: number
+  beneficiary: string
+}
 
 export function useTokenvestingProgram() {
   const { connection } = useConnection()
@@ -20,7 +34,7 @@ export function useTokenvestingProgram() {
 
   const accounts = useQuery({
     queryKey: ['tokenvesting', 'all', { cluster }],
-    queryFn: () => program.account.tokenvesting.all(),
+    queryFn: () => program.account.vestingAccount.all(),
   })
 
   const getProgramAccount = useQuery({
@@ -28,15 +42,18 @@ export function useTokenvestingProgram() {
     queryFn: () => connection.getParsedAccountInfo(programId),
   })
 
-  const initialize = useMutation({
-    mutationKey: ['tokenvesting', 'initialize', { cluster }],
-    mutationFn: (keypair: Keypair) =>
-      program.methods.initialize().accounts({ tokenvesting: keypair.publicKey }).signers([keypair]).rpc(),
+  const ctreateVestingAccount = useMutation<string, Error, CreateVestingArgs>({
+    mutationKey: ['vestingAccount', 'create', { cluster }],
+    mutationFn: ({companyName,mint}) =>
+      program.methods
+    .createVestingAccount(companyName)
+    .accounts({mint: new PublicKey(mint),tokenProgram:TOKENVESTING_PROGRAM_ID})
+    .rpc(),
     onSuccess: (signature) => {
       transactionToast(signature)
       return accounts.refetch()
     },
-    onError: () => toast.error('Failed to initialize account'),
+    onError: () => toast.error('Failed to create vesting account'),
   })
 
   return {
@@ -44,7 +61,7 @@ export function useTokenvestingProgram() {
     programId,
     accounts,
     getProgramAccount,
-    initialize,
+    ctreateVestingAccount,
   }
 }
 
@@ -55,50 +72,25 @@ export function useTokenvestingProgramAccount({ account }: { account: PublicKey 
 
   const accountQuery = useQuery({
     queryKey: ['tokenvesting', 'fetch', { cluster, account }],
-    queryFn: () => program.account.tokenvesting.fetch(account),
+    queryFn: () => program.account.vestingAccount.fetch(account),
   })
 
-  const closeMutation = useMutation({
-    mutationKey: ['tokenvesting', 'close', { cluster, account }],
-    mutationFn: () => program.methods.close().accounts({ tokenvesting: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accounts.refetch()
-    },
-  })
-
-  const decrementMutation = useMutation({
-    mutationKey: ['tokenvesting', 'decrement', { cluster, account }],
-    mutationFn: () => program.methods.decrement().accounts({ tokenvesting: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
+  const createEmployeeVesting = useMutation<string, Error, CreateEmployeeArgs>({
+    mutationKey: ['vestingAccount', 'createEmployee', { cluster }],
+    mutationFn: ({startTime,endTime,amount,cliffTime,beneficiary}) =>
+      program.methods
+    .createEmployeeAccount(new BN(startTime),new BN(endTime),new BN(amount),new BN(cliffTime))
+    .accounts({beneficiary: new PublicKey(beneficiary),vestingAccount: account})
+    .rpc(),
+    onSuccess: (signature) => {
+      transactionToast(signature)
       return accountQuery.refetch()
     },
-  })
-
-  const incrementMutation = useMutation({
-    mutationKey: ['tokenvesting', 'increment', { cluster, account }],
-    mutationFn: () => program.methods.increment().accounts({ tokenvesting: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
-
-  const setMutation = useMutation({
-    mutationKey: ['tokenvesting', 'set', { cluster, account }],
-    mutationFn: (value: number) => program.methods.set(value).accounts({ tokenvesting: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
+    onError: () => toast.error('Failed to create employee account'),
   })
 
   return {
     accountQuery,
-    closeMutation,
-    decrementMutation,
-    incrementMutation,
-    setMutation,
+    createEmployeeVesting
   }
 }

@@ -19,19 +19,19 @@ pub mod tokenvesting {
         ctx: Context<CreateVestingAccount>,
         company_name: String,
     ) -> Result<()> {
-        *ctx.accounts.vestinng_account = VestingAccount {
+        *ctx.accounts.vesting_account = VestingAccount {
             owner: ctx.accounts.signer.key(),
             mint: ctx.accounts.mint.key(),
             treasury_token_account: ctx.accounts.treasury_token_account.key(),
             company_name,
             treasury_bump: ctx.bumps.treasury_token_account,
-            bump: ctx.bumps.vestinng_account,
+            bump: ctx.bumps.vesting_account,
         };
         Ok(())
     }
 
     pub fn create_employee_account(
-        ctx: Context<CtreateEmployeeAccount>,
+        ctx: Context<CreateEmployeeAccount>,
         start_time: i64,
         end_time: i64,
         total_amount: u64,
@@ -105,7 +105,7 @@ pub mod tokenvesting {
 
         token_interface::transfer_checked(cpi_context, claimable_amount, decimals)?;
 
-        employee_account.total_amount += claimable_amount;
+        employee_account.total_withdraw += claimable_amount;
         Ok(())
     }
 }
@@ -168,7 +168,7 @@ pub struct CreateVestingAccount<'info> {
         seeds = [company_name.as_ref()],
         bump,
     )]
-    pub vestinng_account: Account<'info, VestingAccount>,
+    pub vesting_account: Account<'info, VestingAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
 
@@ -188,7 +188,7 @@ pub struct CreateVestingAccount<'info> {
 }
 
 #[derive(Accounts)]
-pub struct CtreateEmployeeAccount<'info> {
+pub struct CreateEmployeeAccount<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 

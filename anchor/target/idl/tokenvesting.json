@@ -276,7 +276,7 @@
           "signer": true
         },
         {
-          "name": "vestinng_account",
+          "name": "vesting_account",
           "writable": true,
           "pda": {
             "seeds": [

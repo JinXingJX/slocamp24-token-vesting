@@ -282,7 +282,7 @@ export type Tokenvesting = {
           "signer": true
         },
         {
-          "name": "vestinngAccount",
+          "name": "vestingAccount",
           "writable": true,
           "pda": {
             "seeds": [

@@ -110,4 +110,46 @@ describe("tokenvesting", () => {
     console.log("Vesting Account Data:", vestingAccountData, null, 2);
     console.log("Create vesting Account:", tx);
   });
+
+  it("should fund the treasury token account", async () => {
+    const amount = 10_000 * 10  ** 9;
+    const mintTx = await mintTo(
+      //@ts-expect-error - Type error in spl-token-bankrun dependency
+      banksClient,
+      employer,
+      mint,
+      treasuryTokenAccount,
+      employer,
+      amount,
+    )
+    console.log("Mint Tx:", mintTx);
+  });
+
+  it("should create a vesting account", async () => {
+    const tx2 = await program.methods.createEmployeeAccount(new BN(0), new BN(100), new BN(100), new BN(0)).accounts({
+      beneficiary: beneficiary.publicKey,
+      vestingAccount: vestingAccountKey,
+    }).rpc({ commitment: "confirmed" , skipPreflight: true });
+    console.log("Create Employee Account:", tx2);
+    console.log("Employee Account:",employeeAccount.toBase58());
+  });
+
+  it("should claim tokens", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const currentClock = await banksClient.getClock();
+    context.setClock(
+      new Clock(
+        currentClock.slot,
+        currentClock.epochStartTimestamp,
+        currentClock.epoch,
+        currentClock.leaderScheduleEpoch,
+        BigInt(10),
+      ),
+    );
+
+    const tx3 = await program2.methods.claimTokens(companyName).accounts({
+      tokenProgram: TOKEN_PROGRAM_ID,
+    }).rpc({ commitment: "confirmed"});
+    console.log("Claim Tokens:", tx3);
+  });
 });
