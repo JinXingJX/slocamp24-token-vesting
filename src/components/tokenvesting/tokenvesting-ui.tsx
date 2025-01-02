@@ -73,8 +73,8 @@ function TokenvestingCard({ account }: { account: PublicKey }) {
 
   const [startTime,setStartTime] = useState(0);
   const [endTime,setEndTime] = useState(0);
-  const [amount,setAmount] = useState(0);
   const [cliffTime,setCliffTime] = useState(0);
+  const [totalAmount,setTotalAmount] = useState(0);
   const [beneficiary,setBeneficiary] = useState('');
 
   const companyName = useMemo(
@@ -101,11 +101,10 @@ function TokenvestingCard({ account }: { account: PublicKey }) {
         <div className='card-actions justify-around '>
                 <input type="text" placeholder="Start Time" value={startTime || ''} onChange={(e) => setStartTime(parseInt(e.target.value))} className='input input-bordered w-full max-w-xs' />
                 <input type="text" placeholder="End Time" value={endTime || ''} onChange={(e) => setEndTime(parseInt(e.target.value))} className='input input-bordered w-full max-w-xs' />
-                <input type="text" placeholder="Amount" value={amount || ''} onChange={(e) => setAmount(parseInt(e.target.value))} className='input input-bordered w-full max-w-xs' />
                 <input type="text" placeholder="Cliff Time" value={cliffTime || ''} onChange={(e) => setCliffTime(parseInt(e.target.value))} className='input input-bordered w-full max-w-xs' />
-                <input type="text" placeholder="Beneficiary" value={beneficiary || ''} onChange={(e) => setBeneficiary(e.target.value)} className='input input-bordered w-full max-w-xs' />
+                <input type="text" placeholder="Total Amount" value={totalAmount || ''} onChange={(e) => setTotalAmount(parseInt(e.target.value))} className='input input-bordered w-full max-w-xs' />
           <button className='btn btn-primary' onClick={() => {
-              createEmployeeVesting.mutateAsync({beneficiary,startTime,endTime,amount,cliffTime});
+              createEmployeeVesting.mutateAsync({startTime,endTime,totalAmount,cliffTime});
           }}>Create Employee Vesting Account</button>
         </div>
       </div>

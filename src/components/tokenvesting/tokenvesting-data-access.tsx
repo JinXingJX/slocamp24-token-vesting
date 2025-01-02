@@ -10,6 +10,7 @@ import {useCluster} from '../cluster/cluster-data-access'
 import {useAnchorProvider} from '../solana/solana-provider'
 import {useTransactionToast} from '../ui/ui-layout'
 import { BN } from '@coral-xyz/anchor'
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 
 interface CreateVestingArgs {
   companyName: string
@@ -19,9 +20,8 @@ interface CreateVestingArgs {
 interface CreateEmployeeArgs {
   startTime: number
   endTime: number
-  amount: number
+  totalAmount: number
   cliffTime: number
-  beneficiary: string
 }
 
 export function useTokenvestingProgram() {
@@ -47,7 +47,7 @@ export function useTokenvestingProgram() {
     mutationFn: ({companyName,mint}) =>
       program.methods
     .createVestingAccount(companyName)
-    .accounts({mint: new PublicKey(mint),tokenProgram:TOKENVESTING_PROGRAM_ID})
+    .accounts({mint: new PublicKey(mint),tokenProgram:TOKEN_PROGRAM_ID})
     .rpc(),
     onSuccess: (signature) => {
       transactionToast(signature)
@@ -68,7 +68,7 @@ export function useTokenvestingProgram() {
 export function useTokenvestingProgramAccount({ account }: { account: PublicKey }) {
   const { cluster } = useCluster()
   const transactionToast = useTransactionToast()
-  const { program, accounts } = useTokenvestingProgram()
+  const { program, accounts} = useTokenvestingProgram()
 
   const accountQuery = useQuery({
     queryKey: ['tokenvesting', 'fetch', { cluster, account }],
@@ -76,15 +76,14 @@ export function useTokenvestingProgramAccount({ account }: { account: PublicKey 
   })
 
   const createEmployeeVesting = useMutation<string, Error, CreateEmployeeArgs>({
-    mutationKey: ['vestingAccount', 'createEmployee', { cluster }],
-    mutationFn: ({startTime,endTime,amount,cliffTime,beneficiary}) =>
+    mutationKey: ['vestingAccount', 'createEmployee', { cluster, account }],
+    mutationFn: ({startTime,endTime,totalAmount,cliffTime}) =>
       program.methods
-    .createEmployeeAccount(new BN(startTime),new BN(endTime),new BN(amount),new BN(cliffTime))
-    .accounts({beneficiary: new PublicKey(beneficiary),vestingAccount: account})
+    .createEmployeeAccount(new BN(startTime),new BN(endTime),new BN(totalAmount),new BN(cliffTime))
     .rpc(),
     onSuccess: (signature) => {
       transactionToast(signature)
-      return accountQuery.refetch()
+      return accounts.refetch()
     },
     onError: () => toast.error('Failed to create employee account'),
   })
